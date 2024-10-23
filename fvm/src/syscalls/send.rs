@@ -7,14 +7,13 @@ use fvm_shared::sys::{self, SendFlags};
 
 use super::Context;
 use crate::gas::Gas;
-use crate::kernel::{ClassifyResult, Result, SendResult};
-use crate::Kernel;
+use crate::kernel::{CallResult, ClassifyResult, Kernel, Result, SendOps};
 
 /// Send a message to another actor. The result is placed as a CBOR-encoded
 /// receipt in the block registry, and can be retrieved by the returned BlockId.
 #[allow(clippy::too_many_arguments)]
 pub fn send(
-    context: Context<'_, impl Kernel>,
+    context: Context<'_, impl SendOps + Kernel>,
     recipient_off: u32,
     recipient_len: u32,
     method: u64,
@@ -37,7 +36,7 @@ pub fn send(
 
     // An execution error here means that something went wrong in the FVM.
     // Actor errors are communicated in the receipt.
-    let SendResult {
+    let CallResult {
         block_id,
         block_stat,
         exit_code,

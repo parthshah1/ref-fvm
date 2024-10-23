@@ -21,7 +21,7 @@ use fvm_shared::error::ExitCode;
 use fvm_shared::message::Message;
 use fvm_shared::state::StateTreeVersion;
 use fvm_shared::version::NetworkVersion;
-use fvm_test_actors::wasm_bin::GAS_CALIBRATION_ACTOR_BIN;
+use fvm_test_actors::wasm_bin::GAS_CALIBRATION_ACTOR_BINARY;
 use lazy_static::lazy_static;
 use num_traits::Zero;
 use serde::Serialize;
@@ -115,10 +115,10 @@ const NOP_ACTOR: &str = r#"
 // Utility function to instantiation integration tester
 pub fn instantiate_tester() -> TestEnv {
     let blockstore = MemoryBlockstore::default();
-    let root = bundle::import_bundle(&blockstore, actors_v10::BUNDLE_CAR).unwrap();
+    let root = bundle::import_bundle(&blockstore, actors_v12::BUNDLE_CAR).unwrap();
     // Instantiate tester
     let mut tester =
-        Tester::new(NetworkVersion::V18, StateTreeVersion::V5, root, blockstore).unwrap();
+        Tester::new(NetworkVersion::V21, StateTreeVersion::V5, root, blockstore).unwrap();
 
     let sender: [Account; 1] = tester.create_accounts().unwrap();
 
@@ -131,7 +131,7 @@ pub fn instantiate_tester() -> TestEnv {
 
     tester
         .set_actor_from_bin(
-            GAS_CALIBRATION_ACTOR_BIN,
+            GAS_CALIBRATION_ACTOR_BINARY,
             state_cid,
             actor_address,
             TokenAmount::from_whole(100),

@@ -51,7 +51,7 @@ impl<'a> TryFrom<&'a crate::econ::TokenAmount> for TokenAmount {
 
 bitflags! {
     /// Flags passed to the send syscall.
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Debug)]
     #[repr(transparent)]
     // note: this is 64 bits because I don't want to hate my past self, not because we need them
     // right now. It doesn't really cost anything anyways.
@@ -65,6 +65,16 @@ impl SendFlags {
     pub fn read_only(self) -> bool {
         self.intersects(Self::READ_ONLY)
     }
+}
+
+/// A fixed sized struct for serializing an [event `Entry`](crate::event::Entry) separately from the
+/// key/value bytes.
+#[repr(C, packed)]
+pub struct EventEntry {
+    pub flags: crate::event::Flags,
+    pub codec: u64,
+    pub key_len: u32,
+    pub val_len: u32,
 }
 
 /// An unsafe trait to mark "syscall safe" types. These types must be safe to memcpy to and from

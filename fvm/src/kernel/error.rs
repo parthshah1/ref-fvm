@@ -1,7 +1,5 @@
 // Copyright 2021-2023 Protocol Labs
 // SPDX-License-Identifier: Apache-2.0, MIT
-use std::fmt::Display;
-
 use derive_more::Display;
 use fvm_shared::error::ErrorNumber;
 
@@ -52,16 +50,6 @@ impl ExecutionError {
         match self {
             Fatal(_) => true,
             OutOfGas | Syscall(_) => false,
-        }
-    }
-
-    /// Returns true if an actor can catch the error. All errors except fatal and out of gas errors
-    /// are recoverable.
-    pub fn is_recoverable(&self) -> bool {
-        use ExecutionError::*;
-        match self {
-            OutOfGas | Fatal(_) => false,
-            Syscall(_) => true,
         }
     }
 }

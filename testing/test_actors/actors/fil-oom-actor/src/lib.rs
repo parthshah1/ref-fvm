@@ -1,5 +1,6 @@
 // Copyright 2021-2023 Protocol Labs
 // SPDX-License-Identifier: Apache-2.0, MIT
+#![allow(clippy::slow_vector_initialization)]
 
 /// Placeholder invoke for testing
 #[no_mangle]
@@ -47,6 +48,7 @@ fn allocate_one() {
         let cap = mem.len();
         mem.resize(2 * cap, 0);
     }
+    std::hint::black_box(mem);
 }
 
 // Allocate many small chunks until OOm
@@ -58,10 +60,11 @@ fn allocate_many() {
         chunk.resize(1024 * 1024, 0);
         chunks.push(chunk);
     }
+    std::hint::black_box(chunks);
 }
 
 #[cfg(target_arch = "wasm32")]
 fn allocate_some() {
     // 64 WASM pages
-    let _ = Vec::<u8>::with_capacity(64 * 65536);
+    std::hint::black_box(Vec::<u8>::with_capacity(64 * 65536));
 }

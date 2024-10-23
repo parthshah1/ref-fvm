@@ -4,6 +4,158 @@ Changes to the reference FVM implementation.
 
 ## [Unreleased]
 
+## 4.4.3 [2024-10-21]
+
+- Update wasmtime to 25.0.2.
+- Fixes long wasm compile times with wasmtime 24.
+
+## 4.4.2 [2024-10-09]
+
+- Update wasmtime to 24.0.1.
+
+## 4.4.1 [2024-10-04]
+
+- chore: remove the `nv24-dev` feature flag [#2051](https://github.com/filecoin-project/ref-fvm/pull/2051)
+
+## 4.4.0 [2024-09-12]
+
+- Update to wasmtime 24.
+- Switch from mach ports to unix signal handlers on macos.
+- Update misc dependencies.
+
+## 4.3.2 [2024-08-16]
+
+- feat: add `nv24-dev` feature flag [#2029](https://github.com/filecoin-project/ref-fvm/pull/2029)
+
+## 4.3.1 [2024-06-26]
+
+- **BREAKING**: Simplify the verify-signtures feature and update ambassador. This is a minor-breaking change because the ambassador macros are now only exported from the prelude/kernel module, not the crate root as they previously were.
+- chore: remove the `nv23-dev` feature flag [#2022](https://github.com/filecoin-project/ref-fvm/pull/2022)
+- chore: update wasmtime to 19.0.2
+
+## 4.3.0 [2024-06-12]
+
+- feat: FIP-0079: syscall for aggregated bls verification [#2003](https://github.com/filecoin-project/ref-fvm/pull/2003)
+- fix: install rust nightly toolchain for clusterfuzzlite [#2007](https://github.com/filecoin-project/ref-fvm/pull/2007)
+- chore: upgrade rust toolchain to 1.78.0 [#2006](https://github.com/filecoin-project/ref-fvm/pull/2006)
+- fix: remove the pairing feature from fvm_shared [#2009](https://github.com/filecoin-project/ref-fvm/pull/2009)
+- Small tidy-ups in CONTRIBUTING.md [#2012](https://github.com/filecoin-project/ref-fvm/pull/2012)
+- NI-PoRep support [#2010](https://github.com/filecoin-project/ref-fvm/pull/2010)
+
+## 4.2.0 [2024-04-29]
+
+- chore: update to wasmtime 19.0.1 [#1993](https://github.com/filecoin-project/ref-fvm/pull/1993)
+- Enable nv23 support behind the `nv23-dev` feature flag [#2000](https://github.com/filecoin-project/ref-fvm/pull/2000)
+- feat: fvm: remove once_cell [#1989](https://github.com/filecoin-project/ref-fvm/pull/1989)
+- feat: shared: check bls zero address without lazy_static [#1984](https://github.com/filecoin-project/ref-fvm/pull/1984)
+
+## 4.1.2 [2024-01-31]
+
+feat: allow CBOR events
+
+## 4.1.1 [2024-01-25]
+
+Enable nv22 support by default.
+
+## 4.1.0 [2024-01-24]
+
+- Default the concurrency of the `ThreadedExecutor` to the available parallelism instead of 8.
+- Support custom syscalls (only needed for non-Filecoin users).
+    - Filecoin now uses the `FilecoinKernel`, not the `DefaultKernel`. The `DefaultKernel` no longer implements Filecoin specific features.
+    - The `Kernel` trait now inherits from the `SyscallHandler` trait, allowing kernels to decide how they want to expose themselves to actors via syscalls.
+- Many internal architecture cleanups with respect to the Kernel and syscall bindings.
+- Added the current actor state to the execution trace (in the `Invoke` event).
+- Add a syscall (enabled with the "upgrade-actor" feature flag) that lets actors "swap-out" their code-CID.
+
+## 4.0.0 [2023-10-31]
+
+Final release, no changes.
+
+## 4.0.0-alpha.4 [2023-09-28]
+
+- Add back some proof types that were mistakenly removed, and fix some of the constants.
+
+## 4.0.0-alpha.3 [2023-09-27]
+
+- Remove support for v1 proofs.
+- Make it possible to construct a GasDuration (and make it possible to refer to the GasDuration type).
+
+## 4.0.0-alpha.2 [2023-09-21]
+
+- Update to wasmtime 12.0.2 (bug fix release)
+- Drop support for versions prior to nv21.
+- Implement FIP-0071, FIP-0072, FIP-0073, FIP-0075
+
+## 4.0.0-alpha.1 [2023-09-20]
+
+Unreleased. This release simply marks the change-over to v4.
+
+## 3.8.0 [2023-09-06]
+
+- Upgrade wasmtime to v12. Unlike prior wasmtime upgrades, this shouldn't be a breaking change as it now mangles its symbols.
+- BREAKING: Upgrade the proofs API to v16.
+- BREAKING (linking): upgrade blstrs to v0.7 and
+- BREAKING: update the minimum rust version to 1.70.0
+
+## 3.7.0 [2023-08-28]
+
+- BREAKING: Add fields to the trace API:
+    - Add a `gas_limit` and `read_only` fields to `ExecutionEvent::Call`.
+    - Add a new `ExecutionEvent::InvokeActor(code_cid)` event when an actor is invoked on any method number (including method 0).
+- Remove the unused `crypto::verify_seal` syscall.
+
+## 3.6.0 [2023-08-18]
+
+Breaking Changes:
+- Perform randomness hashing in the kernel
+  - The FVM no longer supplies a DST and entropy to the client extern when requesting randomness
+  - It expects the client to return the "digest", from which the kernel then draws the randomness
+  - Clients integrating this change should:
+    - no longer expect the DST and entropy parameters for the `get_chain_randomness` and `get_beacon_randomness` externs
+    - omit the last step they currently perform when drawing randomness; that is, return the hashed digest after looking up the randomness source
+- Drop deprecated `hyperspace` feature
+
+Other Changes:
+- Add support for nv21 behind the `nv21-dev` feature flag
+  - Note: We do NOT expect to support nv21 on FVM3, this only facilitates the development of nv21 before FVM4 is ready
+  - We use the Hygge pricelist as-is for nv21 if the `nv21-dev` feature flag is enabled
+- Refactor: remove `with_transaction` and move the "return" gas charge
+  - transaction logic is now entirely in `CallManager::send`
+- Syscalls: fix: Do not assume return pointers are aligned
+- Buffered Blockstore: fixup IPLD flush logic 
+  - Make it less generic (performance).
+  - Remove blocks from the write buffer as we write them to avoid
+    duplicate writes.
+  - Simplify some of the checks around what is allowed. For example, I'm
+    now allowing CBOR + Identity hash which should have been allowed
+    previously but wasn't (we don't use it but still, it should have been
+    allowed).
+  - Remove the explicit 100 byte CID length check. The `Cid` type already
+    validates that the digest can be no longer than 64 bytes.
+  - Be less strict on DagCBOR validation. Counter-intuitively, being
+    overly strict here is dangerous as it gives us more points where
+    implementations can disagree and fork. Instead, we enforce the
+    following rules for DAG_CBOR:
+    1. Blocks must have a valid CBOR structure, but _values_ aren't
+       validated. E.g., no utf-8 validation, no float validation, no
+       minimum encoding requirements, no canonical ordering requirements,
+       etc.
+    2. All CBOR values tagged with 42 must be valid CIDs. I.e., a CBOR
+       byte string starting with a 0x0 byte followed by a valid CID with
+       at most a 64 byte digest.
+
+## 3.5.0 [2023-06-27]
+
+Breaking Changes:
+
+- Update cid/multihash. This is a breaking change as it affects the API.
+- Make `Kernel::send` generic over the kernel that will be used by the called actor. This significantly simplifies testing.
+- Upgrade wasmtime to v10.
+
+Other Changes:
+
+- This version allows over-subscription on the instance pool when executing multiple messages in parallel. This means the number of parallel execution lanes is no longer limited by the address space (or no longer _as_ limited).
+
 ## 3.4.0 [2023-05-04]
 
 Update wasmtime to 8.0.1. This is a breaking change if you use any other wasmtime version.
